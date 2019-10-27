@@ -54,20 +54,102 @@ void j1Chara::LoadAnimations(pugi::xml_node&node)
 	}
 }
 
-void j1Chara::Draw_chara()
+void j1Chara::Updateposition(chara_states state)
 {
-	App->render->Blit(Animations.start->data->texture, position.x, position.y, &Animations.start->data->GetCurrentFrame());
+	p2Point<float>distance;
+	switch (state) {
+	case ST_IDLE_FORWARD:
+		speed.x = 0;
+		front = true;
+		break;
+	case ST_IDLE_BACKWARD:
+		speed.x = 0;
+		front = false;
+		break;
+	case ST_W_FORWARD:
+		speed.x = 20;
+		origin_distance_chara.x = characollider->rect.x + characollider->rect.w;
+		front = true;
+		break;
+	case ST_W_BACKWARD:
+		speed.x = -20;
+		origin_distance_chara.x = characollider->rect.x;
+		front = false;
+		break;
+	}
+	distance.x = App->collisions->closest_x_coll();
+	LOG("D: %f", distance.x);
+	LOG("S: %f", speed.x);
+	if (front) {
+		if (speed.x >= distance.x) {
+			position.x += distance.x - 1;
+		}
+		else {
+			position.x += speed.x;
+		}
+	}
+	else {
+		if (speed.x <= -distance.x) {
+			position.x += -distance.x + 1;
+		}
+		else {
+			position.x += speed.x;
+		}
+	}
+	position.y += speed.y;
+	characollider->SetPos(position.x - (coll_offset_x), position.y - (coll_offset_y));
+	lizardcollider->SetPos(position.x - (coll_offset_x), position.y - (coll_offset_y - (characollider->rect.h - lizardcollider->rect.h)));
+}
+
+void j1Chara::Draw_chara(chara_states state)
+{
+	switch (state)
+	{
+	case ST_IDLE_FORWARD:
+		App->render->Blit(Animations.start->data->texture, position.x, position.y, &Animations.start->data->GetCurrentFrame());
+		break;
+	case ST_IDLE_BACKWARD:
+		App->render->Blit(Animations.start->data->texture, position.x, position.y, &Animations.start->data->GetCurrentFrame(), SDL_FLIP_HORIZONTAL, sprite_tilesets.start->data);
+		break;
+	case ST_W_FORWARD:
+		App->render->Blit(Animations.start->data->texture, position.x, position.y, &Animations.start->next->data->GetCurrentFrame());
+		break;
+	case ST_W_BACKWARD:
+		App->render->Blit(Animations.start->data->texture, position.x, position.y, &Animations.start->next->data->GetCurrentFrame(), SDL_FLIP_HORIZONTAL, sprite_tilesets.start->data);
+		break;
+	}
+}
+
+void j1Chara::OnColl(Collider*chara, Collider*wall)
+{
+
 }
 
 chara_states j1Chara::current_chara_state(p2Queue<chara_inputs>& inputs)
 {
-	static chara_states state = ST_IDLE;
+	static chara_states state = ST_IDLE_FORWARD;
 	chara_inputs last_input;
 	while (inputs.Pop(last_input))
 	{
 		switch (state)
 		{
-		case ST_IDLE:
+		case ST_IDLE_FORWARD:
+		{
+			switch (last_input)
+			{
+			case IN_RIGHT_DOWN:
+				state = ST_W_FORWARD;
+				break;
+			case IN_LEFT_DOWN:
+				state = ST_W_BACKWARD;
+				break;
+			case IN_JUMP:
+				state = ST_J_UP;
+				break;
+			}
+			break;
+		}
+		case ST_IDLE_BACKWARD:
 		{
 			switch (last_input)
 			{
@@ -85,19 +167,19 @@ chara_states j1Chara::current_chara_state(p2Queue<chara_inputs>& inputs)
 		}
 		case ST_W_FORWARD:
 		{
-		
+
 			switch (last_input)
 			{
-			case IN_RIGHT_UP: 
-				state = ST_IDLE;
+			case IN_RIGHT_UP:
+				state = ST_IDLE_FORWARD;
 				break;
 			case IN_R_AND_L:
-				state = ST_IDLE;
+				state = ST_IDLE_FORWARD;
 				break;
 			case IN_JUMP:
 				state = ST_J_FORWARD;
 				break;
-			case IN_LIZARD_DOWN: 
+			case IN_LIZARD_DOWN:
 				state = ST_L_FORWARD;
 				break;
 			}
@@ -109,10 +191,10 @@ chara_states j1Chara::current_chara_state(p2Queue<chara_inputs>& inputs)
 			switch (last_input)
 			{
 			case IN_LEFT_UP:
-				state = ST_IDLE;
+				state = ST_IDLE_BACKWARD;
 				break;
 			case IN_R_AND_L:
-				state = ST_IDLE;
+				state = ST_IDLE_BACKWARD;
 				break;
 			case IN_JUMP:
 				state = ST_J_BACKWARD;
@@ -128,7 +210,14 @@ chara_states j1Chara::current_chara_state(p2Queue<chara_inputs>& inputs)
 			switch (last_input)
 			{
 			case IN_JUMP_FINISH:
-				state = ST_IDLE;
+				if (front = true)
+				{
+					state = ST_IDLE_FORWARD;
+				}
+				else
+				{
+					state = ST_IDLE_BACKWARD;
+				}
 				break;
 			}
 			break;
@@ -138,7 +227,7 @@ chara_states j1Chara::current_chara_state(p2Queue<chara_inputs>& inputs)
 			switch (last_input)
 			{
 			case IN_JUMP_FINISH:
-				state = ST_IDLE;
+				state = ST_IDLE_FORWARD;
 				break;
 			}
 			break;
@@ -148,7 +237,7 @@ chara_states j1Chara::current_chara_state(p2Queue<chara_inputs>& inputs)
 			switch (last_input)
 			{
 			case IN_JUMP_FINISH:
-				state = ST_IDLE;
+				state = ST_IDLE_BACKWARD;
 				break;
 			}
 			break;
@@ -158,7 +247,7 @@ chara_states j1Chara::current_chara_state(p2Queue<chara_inputs>& inputs)
 			switch (last_input)
 			{
 			case IN_LIZARD_FINISH:
-				state = ST_IDLE;
+				state = ST_IDLE_FORWARD;
 				break;
 			}
 			break;
@@ -168,10 +257,12 @@ chara_states j1Chara::current_chara_state(p2Queue<chara_inputs>& inputs)
 			switch (last_input)
 			{
 			case IN_LIZARD_FINISH:
-				state = ST_IDLE;
+				state = ST_IDLE_BACKWARD;
 				break;
 			}
 			break;
+		}
+		break;
 		}
 	}
 	return state;
@@ -182,7 +273,7 @@ bool j1Chara::Load(const char* file_name)
 	bool ret = true;
 	p2SString tmp("%s%s", folder.GetString(), file_name);
 
-	pugi::xml_parse_result result = player_doc.load_file(tmp.GetString());
+	pugi::xml_parse_result result = chara_doc.load_file(tmp.GetString());
 
 	if (result == NULL)
 	{
@@ -191,10 +282,11 @@ bool j1Chara::Load(const char* file_name)
 	}
 	if (ret == true)
 	{
+		bool ret = true;
 		pugi::xml_node chara_node = chara_doc.child("map").child("tileset");
 		if (chara_node == NULL)
 		{
-			LOG("Error parsing chara xml file: Cannot find 'tileset' tag.");
+			LOG("Error parsing character xml file: Cannot find 'tileset' tag.");
 			ret = false;
 		}
 		else
@@ -208,6 +300,7 @@ bool j1Chara::Load(const char* file_name)
 				{
 					ret = App->map->LoadTilesetDetails(tileset, set);
 				}
+
 				if (ret == true)
 				{
 					ret = App->map->LoadTilesetImage(tileset, set, this);
@@ -217,21 +310,14 @@ bool j1Chara::Load(const char* file_name)
 			}
 			chara_node = chara_node.child("tile");
 			LoadAnimations(chara_node);
-			LoadCharaPosition();
+			Load_chara_info();
 		}
+		return ret;
 	}
-	return ret;
+
 }
 
-void j1Chara::Updateposition()
-{
-	position.x += speed.x;
-	position.y += speed.y;
-	speed.x = 0;
-	speed.y = 0;
-}
-
-void j1Chara::LoadCharaPosition()
+/*void j1Chara::LoadCharaPosition()
 {
 	p2SString start;
 	start.create("Start");
@@ -256,6 +342,47 @@ void j1Chara::LoadCharaPosition()
 		}
 		it = it->next;
 	}
+}*/
+
+void j1Chara::Load_chara_info()
+{
+	p2SString group_name; group_name.create("COLLIDER_CHARA");
+	p2SString start; start.create("Start");
+	p2SString chara; chara.create("characollider");
+	p2SString lizard; lizard.create("lizardcollider");
+	p2List_item<objectgroup*>*it = App->map->data.objectgroup.start;
+	while (it != NULL) 
+	{
+		if (it->data->name == group_name) 
+		{
+			for (int i = 0; i < it->data->num_objects; ++i) 
+			{
+				if (it->data->objects[i].name == start) 
+				{
+					position.x = it->data->objects[i].rect.x;
+					position.y = it->data->objects[i].rect.y;
+				}
+				else if (it->data->objects[i].name == chara) 
+				{
+					characollider = App->collisions->AddCollider(it->data->objects[i].rect, COLLIDER_CHARA, App->chara);
+				}
+				else if (it->data->objects[i].name == lizard) 
+				{
+					lizardcollider = App->collisions->AddCollider(it->data->objects[i].rect, COLLIDER_CHARA, App->chara);
+					lizardcollider->active = false;
+				}
+			}
+			break;
+		}
+		it = it->next;
+	}
+	coll_offset_x = position.x - characollider->rect.x;
+	coll_offset_y = position.y - characollider->rect.y;
+}
+
+bool j1Chara::PostUpdate() {
+	camerapos();
+	return true;
 }
 
 bool j1Chara::CleanUp()
@@ -280,6 +407,6 @@ bool j1Chara::CleanUp()
 		it = it->next;
 	}
 	sprite_tilesets.clear();
-	player_doc.reset();
+	chara_doc.reset();
 	return true;
 }

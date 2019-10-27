@@ -11,7 +11,8 @@ enum chara_states
 {
 	ST_UNKNOWN,
 
-	ST_IDLE,
+	ST_IDLE_FORWARD,
+	ST_IDLE_BACKWARD,
 	ST_W_FORWARD,
 	ST_W_BACKWARD,
 	ST_R_FORWARD,
@@ -58,16 +59,24 @@ public:
 	~j1Chara();
 	bool Awake(pugi::xml_node&config);
 
+	bool PostUpdate();
 	bool Load(const char* file_name);
 	void LoadAnimations(pugi::xml_node&node);
-	void j1Chara::LoadCharaPosition();
-	void Draw_chara();
-	void Updateposition();
+	//void j1Chara::LoadCharaPosition();
+	void Draw_chara(chara_states state);
+	void Updateposition(chara_states state);
 	bool CleanUp();
 	p2Point<float> speed;
 	p2Queue<chara_inputs> key_inputs;
 	chara_states j1Chara::current_chara_state(p2Queue<chara_inputs>& inputs);
+	void Load_chara_info();
 	Collider* characollider = nullptr;
+	Collider* lizardcollider = nullptr;
+	void OnColl(Collider*chara, Collider*wall);
+	void change_chara_collider(chara_states state);
+	p2Point<float> origin_distance_chara;
+	bool front = true;
+	bool camerapos();
 
 private:
 	pugi::xml_document chara_doc;
@@ -76,6 +85,8 @@ private:
 	p2List<TileSet*>sprite_tilesets;
 	p2List<CharaAnimation*>Animations;
 	p2Point<float> position;
+	int coll_offset_x;
+	int coll_offset_y;
 	friend class j1Map;
 };
 #endif // __j1CHARA_H__

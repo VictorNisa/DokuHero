@@ -14,14 +14,22 @@ j1Coll::j1Coll()
 	matrix[COLLIDER_WALL][COLLIDER_WALL] = false;
 	matrix[COLLIDER_WALL][COLLIDER_CHARA] = true;
 	matrix[COLLIDER_WALL][COLLIDER_DEATH] = false;
+	matrix[COLLIDER_WALL][COLLIDER_JUMPABLE] = false;
 
 	matrix[COLLIDER_CHARA][COLLIDER_WALL] = true;
 	matrix[COLLIDER_CHARA][COLLIDER_CHARA] = false;
 	matrix[COLLIDER_CHARA][COLLIDER_DEATH] = true;
+	matrix[COLLIDER_CHARA][COLLIDER_JUMPABLE] = true;
 
 	matrix[COLLIDER_DEATH][COLLIDER_WALL] = false;
 	matrix[COLLIDER_DEATH][COLLIDER_CHARA] = true;
 	matrix[COLLIDER_DEATH][COLLIDER_DEATH] = false;
+	matrix[COLLIDER_DEATH][COLLIDER_JUMPABLE] = false;
+
+	matrix[COLLIDER_JUMPABLE][COLLIDER_WALL] = false;
+	matrix[COLLIDER_JUMPABLE][COLLIDER_CHARA] = true;
+	matrix[COLLIDER_JUMPABLE][COLLIDER_DEATH] = false;
+	matrix[COLLIDER_JUMPABLE][COLLIDER_JUMPABLE] = false;
 }
 
 j1Coll::~j1Coll() {}
@@ -59,13 +67,13 @@ bool j1Coll::PreUpdate()
 
 			if (c1->CheckCol(c2->rect) == true)
 			{
-				if (matrix[c1->type][c2->type] && c1->callback)
+				if (matrix[c1->type][c2->type] && c1->callback && c1->active)
 				{
-					c1->callback->OnCollision(c1, c2);
+					c1->callback->OnColl(c1, c2);
 				}
-				if (matrix[c2->type][c1->type] && c2->callback)
+				if (matrix[c2->type][c1->type] && c2->callback && c2->active)
 				{
-					c2->callback->OnCollision(c2, c1);
+					c2->callback->OnColl(c2, c1);
 				}
 			}
 		}
@@ -73,7 +81,72 @@ bool j1Coll::PreUpdate()
 	return UPDATE_CONTINUE;
 }
 
-bool j1Coll::Update()
+//VICTOR: Add colliders
+int j1Coll::closest_x_coll()
+{
+	int now;
+	int close;
+	if (App->chara->front) 
+	{
+		close = App->map->data.width*App->map->data.tile_width;
+		for (int i = 0; colliders[i]!=nullptr; i++)
+		{
+			if ((colliders[i]->type == COLLIDER_WALL) && (colliders[i]->active) && (colliders[i]->rect.x > App->chara->origin_distance_chara.x))
+			{
+				now = colliders[i]->rect.x - App->chara->origin_distance_chara.x;
+				if (now < close)
+				{
+					close = now;
+				}
+			}
+		}
+	}
+	else
+	{
+		close = App->map->data.width*App->map->data.tile_width;
+		for (int i = 0; colliders[i] != nullptr; i++)
+		{
+			if ((colliders[i]->type == COLLIDER_WALL) && (colliders[i]->active) && ((colliders[i]->rect.x + colliders[i]->rect.w) < App->chara->origin_distance_chara.x))
+			{
+				now = App->chara->origin_distance_chara.x - (colliders[i]->rect.x + colliders[i]->rect.w);
+				if (now < close)
+				{
+					close = now;
+				}
+			}
+		}
+	}
+	return close;
+}
+
+int j1Coll::closest_y_coll() {
+	int x = 0;
+	return x;
+}
+
+void j1Coll::update_colliders()
+{
+	for (int i = 0; i < MAX_COLLIDERS; i++)
+	{
+		while (colliders[i] != nullptr)
+		{
+			if (colliders[i]->type == COLLIDER_JUMPABLE)
+			{
+				if ((App->chara->characollider->rect.y + App->chara->characollider->rect.h) < colliders[i]->rect.y)
+				{
+					colliders[i]->active = true;
+				}
+				else
+				{
+					colliders[i]->active = false;
+				}
+			}
+			i++;
+		}
+	}
+}
+
+bool j1Coll::Update(float dt)
 {
 	DebugDraw();
 	return UPDATE_CONTINUE;
@@ -81,7 +154,7 @@ bool j1Coll::Update()
 
 void j1Coll::DebugDraw()
 {
-	if (App->input->GetKey(SDL_SCANCODE_F5) == KEY_DOWN);
+	if (App->input->GetKey(SDL_SCANCODE_F9) == KEY_DOWN)
 	{
 		debug = !debug;
 	}
@@ -93,6 +166,10 @@ void j1Coll::DebugDraw()
 	for (uint i = 0; i < MAX_COLLIDERS; i++)
 	{
 		if (colliders[i] == nullptr)
+		{
+			continue;
+		}
+		if (colliders[i]->active)
 		{
 			continue;
 		}

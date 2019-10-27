@@ -82,7 +82,7 @@ public:
 
 	p2SString	name;
 	bool		active;
-	virtual void OnCollision(Collider*, Collider*) {};
+	virtual void OnColl(Collider*, Collider*) {};
 
 };
 

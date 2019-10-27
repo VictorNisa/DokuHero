@@ -21,6 +21,7 @@ struct Collider
 {
 	SDL_Rect rect;
 	bool to_delete = false;
+	bool active = true;
 	COLLIDER_TYPE type;
 	j1Module* callback = nullptr;
 
@@ -44,11 +45,14 @@ public:
 	~j1Coll();
 
 	bool PreUpdate() override;
-	bool Update();
+	bool Update(float dt);
 	bool CleanUp() override;
 
 	Collider* AddCollider(SDL_Rect rect, COLLIDER_TYPE type, j1Module* callback = nullptr);
+	void update_colliders();
 	void DebugDraw();
+	int closest_x_coll();
+	int closest_y_coll();
 
 private:
 	Collider* colliders[MAX_COLLIDERS];
