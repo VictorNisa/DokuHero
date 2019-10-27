@@ -5,6 +5,7 @@ DokuHero is a little platformer game theoretically made by two students. It is o
 ## Controls
 
 - Movement: WASD
+- Save/Load: S/L
 - Toggle Collision boxes visibility: F9
 
 ## Developers
