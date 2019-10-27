@@ -189,7 +189,7 @@ bool j1Map::Load(const char* file_name)
 
 		if(ret == true)
 		{
-			ret = LoadTilesetImage(tileset, set);
+			ret = LoadTilesetImage(tileset, set, this);
 		}
 
 		data.tilesets.add(set);
@@ -432,6 +432,17 @@ bool j1Map::LoadTilesetImage(pugi::xml_node& tileset_node, TileSet* set)
 }
 
 // TODO 3: Create the definition for a function that loads a single layer
-//bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
-//{
-//}
+bool j1Map::LoadLayer(pugi::xml_node& layer_node, map_layer* layer) {
+	bool ret = true;
+	layer->name.create(layer_node.attribute("name").as_string());
+	layer->width = layer_node.attribute("width").as_uint();
+	layer->height = layer_node.attribute("height").as_uint();
+	layer->tiled_gid = new uint[layer->width * layer->height]();
+	layer->parallaxspeed = layer_node.child("properties").child("property").attribute("value").as_float();
+	int i = 0;
+	pugi::xml_node lay = layer_node.child("data").child("tile");
+	for (lay; lay; lay = lay.next_sibling("tile"), ++i) {
+		layer->tiled_gid[i] = lay.attribute("gid").as_int();
+	}
+	return ret;
+}

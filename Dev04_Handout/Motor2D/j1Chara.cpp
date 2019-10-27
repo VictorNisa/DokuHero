@@ -5,6 +5,7 @@
 #include "j1Chara.h"
 #include "p2Log.h"
 #include "j1Textures.h"
+#include "j1Window.h"
 
 j1Chara::j1Chara() :j1Module(), chara_loaded(false)
 {
@@ -76,10 +77,21 @@ void j1Chara::Updateposition(chara_states state)
 		origin_distance_chara.x = characollider->rect.x;
 		front = false;
 		break;
+	case ST_L_FORWARD:
+		speed.x = 30;
+		origin_distance_chara.x = characollider->rect.x + lizardcollider->rect.w;
+		front = true;
+		break;
+	case ST_L_BACKWARD:
+		speed.x = -30;
+		origin_distance_chara.x = characollider->rect.x;
+		front = false;
+		break;
 	}
 	distance.x = App->collisions->closest_x_coll();
 	LOG("D: %f", distance.x);
 	LOG("S: %f", speed.x);
+	LOG("p: %f", position.x);
 	if (front) {
 		if (speed.x >= distance.x) {
 			position.x += distance.x - 1;
@@ -116,6 +128,18 @@ void j1Chara::Draw_chara(chara_states state)
 		break;
 	case ST_W_BACKWARD:
 		App->render->Blit(Animations.start->data->texture, position.x, position.y, &Animations.start->next->data->GetCurrentFrame(), SDL_FLIP_HORIZONTAL, sprite_tilesets.start->data);
+		break;
+	case ST_J_FORWARD:
+		App->render->Blit(Animations.start->data->texture, position.x, position.y, &Animations.start->next->next->data->DoOneLoop());
+		break;
+	case ST_J_BACKWARD:
+		App->render->Blit(Animations.start->data->texture, position.x, position.y, &Animations.start->next->next->data->DoOneLoop(), SDL_FLIP_HORIZONTAL, sprite_tilesets.start->data);
+		break;
+	case ST_L_FORWARD:
+		App->render->Blit(Animations.start->data->texture, position.x, position.y, &Animations.start->next->next->next->data->DoOneLoop());
+		break;
+	case ST_L_BACKWARD:
+		App->render->Blit(Animations.start->data->texture, position.x, position.y, &Animations.start->next->next->next->data->DoOneLoop(), SDL_FLIP_HORIZONTAL, sprite_tilesets.start->data);
 		break;
 	}
 }
@@ -378,8 +402,19 @@ void j1Chara::Load_chara_info()
 	}
 	coll_offset_x = position.x - characollider->rect.x;
 	coll_offset_y = position.y - characollider->rect.y;
+	coll_lizard_offset_x = position.x - lizardcollider->rect.x;
 }
-
+bool j1Chara::camerapos()
+{
+	App->render->camera.x = -position.x + ((App->win->width / 2) - (sprite_tilesets.start->data->tile_width / 2));
+	if (App->render->camera.x > 0) {
+		App->render->camera.x = 0;
+	}
+	//App->render->camera.y = position.y - App->win->height / 2;
+	//if (App->win->width / 2 < 0)App->render->camera.x = 0;
+	//if (App->render->camera.y > App->render->initial_camera_y)App->render->camera.y = App->render->initial_camera_y;
+	return true;
+}
 bool j1Chara::PostUpdate() {
 	camerapos();
 	return true;

@@ -44,6 +44,7 @@ bool j1Coll::PreUpdate()
 			colliders[i] = nullptr;
 		}
 	}
+	update_colliders();
 	Collider* c1;
 	Collider* c2;
 
@@ -124,6 +125,20 @@ int j1Coll::closest_y_coll() {
 	return x;
 }
 
+bool j1Coll::on_the_way_x(int index) {
+	bool not_on_the_way;
+	if (App->chara->characollider->active) {
+		not_on_the_way = ((App->chara->characollider->rect.y + App->chara->characollider->rect.h) < colliders[index]->rect.y)
+			|| ((App->chara->characollider->rect.y) > (colliders[index]->rect.y + colliders[index]->rect.h));
+	}
+	else if (App->chara->lizardcollider->active) {
+		not_on_the_way = ((App->chara->lizardcollider->rect.y + App->chara->lizardcollider->rect.h) < colliders[index]->rect.y)
+			|| ((App->chara->lizardcollider->rect.y) > (colliders[index]->rect.y + colliders[index]->rect.h));
+
+	}
+	return !not_on_the_way;
+}
+
 void j1Coll::update_colliders()
 {
 	for (int i = 0; i < MAX_COLLIDERS; i++)
@@ -171,23 +186,26 @@ void j1Coll::DebugDraw()
 		}
 		if (colliders[i]->active)
 		{
-			continue;
+			switch (colliders[i]->type)
+			{
+			case COLLIDER_NONE:
+				App->render->DrawQuad(colliders[i]->rect, 255, 255, 255, alpha);
+				break;
+			case COLLIDER_WALL:
+				App->render->DrawQuad(colliders[i]->rect, 255, 0, 0, alpha);
+				break;
+			case COLLIDER_JUMPABLE:
+				App->render->DrawQuad(colliders[i]->rect, 0, 0, 255, alpha);
+				break;
+			case COLLIDER_CHARA:
+				App->render->DrawQuad(colliders[i]->rect, 0, 255, 0, alpha);
+				break;
+			case COLLIDER_DEATH:
+				App->render->DrawQuad(colliders[i]->rect, 0, 0, 0, alpha);
+				break;
+			}
 		}
-		switch (colliders[i]->type)
-		{
-		case COLLIDER_NONE:
-			App->render->DrawQuad(colliders[i]->rect, 255, 255, 255, alpha);
-			break;
-		case COLLIDER_WALL:
-			App->render->DrawQuad(colliders[i]->rect, 255, 0, 0, alpha);
-			break;
-		case COLLIDER_JUMPABLE:
-			App->render->DrawQuad(colliders[i]->rect, 0, 0, 255, alpha);
-		case COLLIDER_CHARA:
-			App->render->DrawQuad(colliders[i]->rect, 0, 255, 0, alpha);
-		case COLLIDER_DEATH:
-			App->render->DrawQuad(colliders[i]->rect, 0, 0, 0, alpha);
-		}
+		
 	}
 }
 

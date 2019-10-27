@@ -4,9 +4,11 @@
 #include "j1Input.h"
 #include "j1Chara.h"
 #include "j1Window.h"
+#include "j1Coll.h"
 #include "SDL/include/SDL.h"
 
 #define MAX_KEYS 300
+#define LIZARD 200
 
 j1Input::j1Input() : j1Module()
 {
@@ -78,6 +80,13 @@ bool j1Input::PreUpdate()
 		if(mouse_buttons[i] == KEY_UP)
 			mouse_buttons[i] = KEY_IDLE;
 	}
+
+
+	static bool left = false;
+	static bool right = false;
+	static bool down = false;
+	static bool up = false;
+
 
 	while(SDL_PollEvent(&event) != 0)
 	{
@@ -210,6 +219,14 @@ bool j1Input::PreUpdate()
 		{
 			App->chara->key_inputs.Push(IN_JUMP);
 		}
+	}
+
+	if (App->chara->lizard > LIZARD)
+	{
+		App->chara->key_inputs.Push(IN_LIZARD_FINISH);
+		App->chara->characollider->active = true;
+		App->chara->lizardcollider->active = false;
+		App->chara->lizard = 0;
 	}
 	return true;
 }

@@ -103,6 +103,7 @@ bool j1Audio::PlayMusic(const char* path, float fade_time)
 		Mix_FreeMusic(music);
 	}
 
+	//path = folder.GetString();
 	music = Mix_LoadMUS(path);
 
 	if(music == NULL)

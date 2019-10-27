@@ -16,6 +16,7 @@ class j1Map;
 class j1Chara;
 class j1Coll;
 class j1Module;
+class j1Transition;
 
 class j1App
 {
@@ -88,6 +89,7 @@ public:
 	j1Map*				map;
 	j1Chara*			chara;
 	j1Coll*				collisions;
+	j1Transition*		transition;
 
 private:
 

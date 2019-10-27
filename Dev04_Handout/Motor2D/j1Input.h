@@ -35,11 +35,6 @@ public:
 	// Destructor
 	virtual ~j1Input();
 
-	static bool left = false;
-	static bool right = false;
-	static bool down = false;
-	static bool up = false;
-
 	// Called before render is available
 	bool Awake(pugi::xml_node&);
 

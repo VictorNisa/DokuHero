@@ -24,6 +24,7 @@ struct Collider
 	bool active = true;
 	COLLIDER_TYPE type;
 	j1Module* callback = nullptr;
+	Collider();
 
 	Collider(SDL_Rect rectangle, COLLIDER_TYPE type, j1Module* callback = nullptr) :
 		rect(rectangle),
@@ -53,6 +54,7 @@ public:
 	void DebugDraw();
 	int closest_x_coll();
 	int closest_y_coll();
+	bool on_the_way_x(int index);
 
 private:
 	Collider* colliders[MAX_COLLIDERS];

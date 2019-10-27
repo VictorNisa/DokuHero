@@ -13,6 +13,7 @@
 #include "j1App.h"
 #include "j1Chara.h"
 #include "j1Coll.h"
+#include "j1Transition.h"
 
 // Constructor
 j1App::j1App(int argc, char* args[]) : argc(argc), args(args)
@@ -22,6 +23,7 @@ j1App::j1App(int argc, char* args[]) : argc(argc), args(args)
 
 	input = new j1Input();
 	win = new j1Window();
+	collisions = new j1Coll;
 	render = new j1Render();
 	tex = new j1Textures();
 	audio = new j1Audio();
@@ -38,6 +40,7 @@ j1App::j1App(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(map);
 	AddModule(scene);
 	AddModule(chara);
+	AddModule(collisions);
 
 	// render last to swap buffer
 	AddModule(render);

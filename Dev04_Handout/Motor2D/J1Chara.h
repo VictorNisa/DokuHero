@@ -44,12 +44,13 @@ struct Frame {
 };
 
 struct CharaAnimation {
-	const char* name;
+	p2SString name;
 	uint total_frames;
 	float current_frame;
 	SDL_Texture* texture;
 	Frame* frames;
 	SDL_Rect& GetCurrentFrame();
+	SDL_Rect& DoOneLoop();
 };
 
 class j1Chara :public j1Module
@@ -73,10 +74,12 @@ public:
 	Collider* characollider = nullptr;
 	Collider* lizardcollider = nullptr;
 	void OnColl(Collider*chara, Collider*wall);
-	void change_chara_collider(chara_states state);
+//	void change_chara_collider(chara_states state);
 	p2Point<float> origin_distance_chara;
 	bool front = true;
 	bool camerapos();
+	float lizard;
+	p2Point<float>distance;
 
 private:
 	pugi::xml_document chara_doc;
@@ -87,6 +90,7 @@ private:
 	p2Point<float> position;
 	int coll_offset_x;
 	int coll_offset_y;
+	int coll_lizard_offset_x;
 	friend class j1Map;
 };
 #endif // __j1CHARA_H__

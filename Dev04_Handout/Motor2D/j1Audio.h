@@ -39,6 +39,9 @@ private:
 	_Mix_Music*			music;
 	p2List<Mix_Chunk*>	fx;
 	p2SString			audio;
+
+public:
+	p2SString folder;
 };
 
 #endif // __j1AUDIO_H__
