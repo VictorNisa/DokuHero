@@ -10,22 +10,28 @@ DokuHero is a little platformer game theoretically made by two students. It is o
 ## Developers
 
       Victor Nisa
-      [GitHub](https://github.com/VictorNisa)
       In charge of coding, ripping and editing srites, tiles, map design and any other task.
-
+[GitHub link](https://github.com/VictorNisa)
 
 ## Programs Used and credits
 
 Coding: Visual studio (language: C++, libraries: SDL and pugi)
+
 Maps: Tiled
+
 Sprites from https://rvros.itch.io/animated-pixel-hero (edited using Photoshop)
+
 Tiles from https://dokucraft.co.uk/ (extracted and edited using Photoshop)
+
 Music and sound effects by Dan Salvato
+
 
 ## Disclaimer
 
 I do not own any of the sprites, music, tilesets, libraries.
-Most of the code has been taken from CITM's handouts and implemented into this game
+
+Most of the code has been taken from CITM's handouts and implemented into this game.
+
 [CITM Website](https://citm.fundacioupc.com)
 
 ## License
