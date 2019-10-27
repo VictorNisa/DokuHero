@@ -395,7 +395,7 @@ bool j1Map::LoadTilesetDetails(pugi::xml_node& tileset_node, TileSet* set)
 	return ret;
 }
 
-bool j1Map::LoadTilesetImage(pugi::xml_node& tileset_node, TileSet* set)
+bool j1Map::LoadTilesetImage(pugi::xml_node& tileset_node, TileSet* set, j1Module*module)
 {
 	bool ret = true;
 	pugi::xml_node image = tileset_node.child("image");
